@@ -78,6 +78,53 @@ def get_user_info(instaname):
         except:
             KeyError        #catching keyerror of dictionary user-info
 
+
+#this fucntion display the recent post in his own profile
+def get_own_post():
+    try:
+        request_url=(BASE_URL + "users/self/media/recent/?access_token=%s") % (ACCESS_TOKEN)  #fetching your own data from instagram using "user/self" end point
+        print "The GET request url is %s" %(request_url)            #display the GET url
+        own_post= requests.get(request_url).json()             #requesting to get the data from the url above mentioned using requests package and using json()
+    except:
+        print colored("GET request is not working properly","red")     #print this when get request isn't correct
+    try:
+        if(own_post['meta']['code'])==200:     #checking the status code of request. if 200 then it is accepted otherwise the else part will work
+            if len(own_post['data']):              #checking if we have anything in data of user
+                return own_post['data'][0]['id']   #if post exits then return id
+            else:
+                print colored('Post does not exist!',"red")   #print if no post in profile
+        else:
+            print colored("The request url is not in accepted state","red")        #print when status is in "not accepted" state
+    except:
+        KeyError        #catching the keyerror of dictionary
+
+
+
+
+#this fucntion display the recent post of his friend
+def get_user_post(instaname):
+    user_id = get_user_id(instaname)  # calling get_user_id() fucntion and getting insta id
+    if user_id == None:
+        print "There is no data in this account"  # print when id is null
+    else:
+        try:
+            request_url = (BASE_URL + "users/%s/media/recent/?access_token=%s") % (user_id, ACCESS_TOKEN)  # searching friend's id from instagram using "user/search" end point
+            print "The GET request url is %s" % (request_url)  # display the GET url
+            user_post = requests.get(request_url).json()  # requesting to get the data from the url above mentioned using requests package and using json()
+        except:
+            print colored("GET request is not working properly", "red")  # print when incorrect url
+        try:
+            if (user_post['meta']['code']) == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                if len(user_post['data']):  # checking if we have anything in data of friend's id
+                    return user_post['data'][0]['id']
+                else:
+                    print "There is no recent post!"
+            else:
+                print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
+        except:
+            KeyError  # catching keyerror of dictionary user-info
+
+
 #function contaning various menu option
 def StartBot():
     while True:
@@ -85,14 +132,21 @@ def StartBot():
         print colored('Here are your menu options:',"red")                 #Printing various menu option
         print "a.Get your own details\n"
         print "b.Get details of a user by username\n"
-        print "c.If you want to exit"
+        print "c.Get your own recent post\n"
+        print "d.Get user's recent post by username\n"
+        print "e.If you want to exit"
         choice = raw_input(colored("Enter you choice: ","yellow"))        #getting menu choice from user
         if choice == "a":
             self_info()         #if choice is "a" then self_info() called
         elif choice == "b":
             insta_username = raw_input(colored("Enter the username of the user: ","blue"))
             get_user_info(insta_username)     #if choice is "b" then get_user_info() called and friend's insta name is passed as parameter
-        elif choice=="c":
+        elif choice == "c":
+            get_own_post()      #if choice is "c" then get_own_post() called
+        elif choice == "d":
+            insta_username = raw_input(colored("Enter the username of the user: ", "blue"))
+            get_user_post(insta_username)  # if choice is "b" then get_user_post() called and friend's insta name is passed as parameter
+        elif choice=="e":
             exit()              #exit the program
         else:
             print colored("wrong choice","red")   #if choice entered is wrong then print it
