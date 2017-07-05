@@ -1,3 +1,4 @@
+import urllib   #importing package which fetch data from internet
 import requests    #importing request package
 from termcolor import colored   #import colored package
 
@@ -90,7 +91,10 @@ def get_own_post():
     try:
         if(own_post['meta']['code'])==200:     #checking the status code of request. if 200 then it is accepted otherwise the else part will work
             if len(own_post['data']):              #checking if we have anything in data of user
-                return own_post['data'][0]['id']   #if post exits then return id
+                image_name = own_post['data'][0]['id'] + '.jpeg'        #fetching post id from data and storing it in image_name with .jpeg extension
+                image_url = own_post['data'][0]['images']['standard_resolution']['url'] #getting url of post and storing in image_url
+                urllib.urlretrieve(image_url, image_name)           #retriving the image from image_url and saving in image_name
+                print colored('Your image has been downloaded!',"green")  #SUCESS MESSASGE
             else:
                 print colored('Post does not exist!',"red")   #print if no post in profile
         else:
@@ -116,7 +120,10 @@ def get_user_post(instaname):
         try:
             if (user_post['meta']['code']) == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
                 if len(user_post['data']):  # checking if we have anything in data of friend's id
-                    return user_post['data'][0]['id']
+                    image_name = user_post['data'][0]['id'] + '.jpeg'        #fetching post id from data and storing it in image_name with .jpeg extension
+                    image_url = user_post['data'][0]['images']['standard_resolution']['url']        #getting url of post and storing in image_url
+                    urllib.urlretrieve(image_url, image_name)        #retriving the image from image_url and saving in image_name
+                    print colored('Your image has been downloaded!',"green")      #SUCESS MESSASGE
                 else:
                     print "There is no recent post!"
             else:
