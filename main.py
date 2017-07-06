@@ -1,3 +1,7 @@
+
+
+from textblob import TextBlob
+from textblob.sentiments import NaiveBayesAnalyzer
 import urllib   #importing package which fetch data from internet
 import requests    #importing request package
 from termcolor import colored   #import colored package
@@ -287,8 +291,7 @@ def get_comment_list(instaname):
                     else:
                         print colored("There is no recent comment!", "red")
                 else:
-                    print colored("The request url is not in accepted state",
-                                  "red")  # print when status is in "not accepted" state
+                    print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
             except:
                 KeyError
 
@@ -321,6 +324,48 @@ def comment_on_post(instaname):
 
 
 
+def delete_negative_comment(instaname):
+    user_id = get_user_id(instaname)
+    if user_id == None:
+        print "There is no data in this account"  # print when id is null
+    else:
+        media_id = get_media_id(user_id)
+        if media_id == None:
+            print "There is no media in this account"  # print when id is null
+        else:
+            request_url = (BASE_URL + 'media/%s/comments/?access_token=%s') % (media_id, ACCESS_TOKEN)
+            print 'GET request url : %s' % (request_url)
+            comment_info = requests.get(request_url).json()
+
+            if comment_info['meta']['code'] == 200:
+                if len(comment_info['data']):
+                    for cmnt in range(len(comment_info['data'])):
+                        comment_list=comment_info['data'][cmnt]['text']
+                        comment_id=comment_info['data'][cmnt]['id']
+                        blob = TextBlob(comment_list, analyzer=NaiveBayesAnalyzer())
+                        if (blob.sentiment.p_neg > blob.sentiment.p_pos):
+                            print colored("Your comment is %s :(" ,"red") %comment_list
+                            try:
+                                request_url = (BASE_URL + 'media/%s/comments/%s/?access_token=%s') %(media_id,comment_id,ACCESS_TOKEN)
+                                print "Delete request url :%s" % (request_url)
+                                del_info= requests.delete(request_url).json()
+                            except:
+                                print colored("Request URL not coorect!","red")
+                            try:
+                                if del_info['meta']['code'] == 200:
+                                    print colored("Comment deleted :) ","green")
+                                else:
+                                    print colored("Unable to delete comment :(","red")
+                            except:
+                                KeyError
+
+                        else:
+                            print colored("%s is a Positive comment :) ","green") % (comment_list)
+                else:
+                    print colored("No comments present on this post","red")
+            else:
+                print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
+
 
 #function contaning various menu option
 def StartBot():
@@ -336,7 +381,8 @@ def StartBot():
         print "g.Unlike the post of your friend\n"
         print "h.Get the list of recent comment on your post\n"
         print "i.Comment on post\n"
-        print "j.Exit the application"
+        print "j.Delete negative comments \n"
+        print "k.Exit the application"
         choice = raw_input(colored("Enter you choice: ","yellow"))        #getting menu choice from user
         if choice == "a":
             self_info()         #if choice is "a" then self_info() called
@@ -363,9 +409,10 @@ def StartBot():
         elif choice == "i":
             insta_username = raw_input(colored("Enter the username whose post you want to comment on: ", "blue"))
             comment_on_post(insta_username)
-
-
         elif choice=="j":
+            insta_username = raw_input(colored("Enter the username on whose id u want to delete the comments:" , "blue"))
+            delete_negative_comment(insta_username)
+        elif choice=="k":
             exit()              #exit the program
         else:
             print colored("wrong choice","red")   #if choice entered is wrong then print it
