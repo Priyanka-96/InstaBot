@@ -1,5 +1,7 @@
 
 
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
 import urllib   #importing package which fetch data from internet
@@ -367,6 +369,49 @@ def delete_negative_comment(instaname):
                 print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
 
 
+def display_pie_chart(instaname):
+    user_id = get_user_id(instaname)
+    if user_id == None:
+        print "There is no data in this account"  # print when id is null
+    else:
+        media_id = get_media_id(user_id)
+        if media_id == None:
+            print "There is no media in this account"  # print when id is null
+        else:
+            request_url = (BASE_URL + 'media/%s/comments/?access_token=%s') % (media_id, ACCESS_TOKEN)
+            print 'GET request url : %s' % (request_url)
+            comment_info = requests.get(request_url).json()
+
+            if comment_info['meta']['code'] == 200:
+                if len(comment_info['data']):
+                    list=[]
+                    for cmnt in range(len(comment_info['data'])):
+                        comment_list = comment_info['data'][cmnt]['text']
+                        list.append(comment_list)
+
+                    comment = ''.join(list)
+                    print comment
+                    blob = TextBlob(comment, analyzer=NaiveBayesAnalyzer())
+                    values = [blob.sentiment.p_pos, blob.sentiment.p_neg]
+                    labels = ['Positive\nComments', 'Negative\nComments']
+
+                    fig = plt.figure()
+                    fig.patch.set_facecolor('pink')
+                    fig.patch.set_alpha(0.7)
+
+                    col = ['blue', 'yellow']
+                    plt.pie(values, labels=labels, startangle=90, autopct='%1.1f%%', colors=col, shadow=True,explode=(0, 0.1))
+                    plt.title("Negative VS Positive Comments \n (Percentage Comparison)")
+                    plt.legend()
+                    plt.show()
+                    StartBot()
+
+                else:
+                    print colored("No comments present on this post", "red")
+            else:
+                print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
+
+
 #function contaning various menu option
 def StartBot():
     while True:
@@ -382,40 +427,48 @@ def StartBot():
         print "h.Get the list of recent comment on your post\n"
         print "i.Comment on post\n"
         print "j.Delete negative comments \n"
-        print "k.Exit the application"
+        print "k.Display pie chart comparing negative and positive comments on a post \n"
+        print "l.Exit the application"
         choice = raw_input(colored("Enter you choice: ","yellow"))        #getting menu choice from user
-        if choice == "a":
-            self_info()         #if choice is "a" then self_info() called
-        elif choice == "b":
-            insta_username = raw_input(colored("Enter the username of the user: ","blue"))
-            get_user_info(insta_username)     #if choice is "b" then get_user_info() called and friend's insta name is passed as parameter
-        elif choice == "c":
-            get_own_post()      #if choice is "c" then get_own_post() called
-        elif choice == "d":
-            insta_username = raw_input(colored("Enter the username of the user: ", "blue"))
-            get_user_post(insta_username)  # if choice is "b" then get_user_post() called and friend's insta name is passed as parameter
-        elif choice=="e":
-            insta_username = raw_input(colored("Enter the username of the user: ", "blue"))
-            get_like_list(insta_username)
-        elif choice=="f":
-            insta_username = raw_input(colored("Enter the username whose post you want to like: ", "blue"))
-            like_a_post(insta_username)
-        elif choice == "g":
-            insta_username = raw_input(colored("Enter the username whose post you want to unlike: ", "blue"))
-            unlike_a_post(insta_username)
-        elif choice == "h":
-            insta_username = raw_input(colored("Enter the username whose comment you want to see on recent post: ", "blue"))
-            get_comment_list(insta_username)
-        elif choice == "i":
-            insta_username = raw_input(colored("Enter the username whose post you want to comment on: ", "blue"))
-            comment_on_post(insta_username)
-        elif choice=="j":
-            insta_username = raw_input(colored("Enter the username on whose id u want to delete the comments:" , "blue"))
-            delete_negative_comment(insta_username)
-        elif choice=="k":
-            exit()              #exit the program
+        if len(choice)>0 and len(choice)<2 and choice.isalpha()==True and choice.isspace()==False :
+            if choice == "a":
+                self_info()         #if choice is "a" then self_info() called
+            elif choice == "b":
+                insta_username = raw_input(colored("Enter the username of the user: ","blue"))
+                get_user_info(insta_username)     #if choice is "b" then get_user_info() called and friend's insta name is passed as parameter
+            elif choice == "c":
+                get_own_post()      #if choice is "c" then get_own_post() called
+            elif choice == "d":
+                insta_username = raw_input(colored("Enter the username of the user: ", "blue"))
+                get_user_post(insta_username)  # if choice is "b" then get_user_post() called and friend's insta name is passed as parameter
+            elif choice=="e":
+                insta_username = raw_input(colored("Enter the username of the user: ", "blue"))
+                get_like_list(insta_username)
+            elif choice=="f":
+                insta_username = raw_input(colored("Enter the username whose post you want to like: ", "blue"))
+                like_a_post(insta_username)
+            elif choice == "g":
+                insta_username = raw_input(colored("Enter the username whose post you want to unlike: ", "blue"))
+                unlike_a_post(insta_username)
+            elif choice == "h":
+                insta_username = raw_input(colored("Enter the username whose comment you want to see on recent post: ", "blue"))
+                get_comment_list(insta_username)
+            elif choice == "i":
+                insta_username = raw_input(colored("Enter the username whose post you want to comment on: ", "blue"))
+                comment_on_post(insta_username)
+            elif choice=="j":
+                insta_username = raw_input(colored("Enter the username on whose id u want to delete the comments:" , "blue"))
+                delete_negative_comment(insta_username)
+            elif choice=="k":
+                insta_username = raw_input(colored("Enter the username whose comments-comparison pie chart you want to see" , "blue"))
+                display_pie_chart(insta_username)
+            elif choice=="l":
+                exit()              #exit the program
+            else:
+                print colored("wrong choice","red")   #if choice entered is wrong then print
         else:
-            print colored("wrong choice","red")   #if choice entered is wrong then print it
+            print colored("You have entered a wrong choice !Try Again","red")
+
 
 StartBot()
 
