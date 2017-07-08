@@ -11,8 +11,12 @@ from termcolor import colored   #import colored package
 ACCESS_TOKEN="1572048031.23652d8.52bd5931f05b4c2f92fc6cc9a1e76378"         #my access token
 BASE_URL = 'https://api.instagram.com/v1/'          #instagram base url
 
-#this function display own information
+
 def self_info():
+
+    """  This function retrieve the information of the admin/self and display it """
+    print colored(self_info.__doc__,"magenta")
+
     try:
         request_url=(BASE_URL + "users/self/?access_token=%s") % (ACCESS_TOKEN)  #fetching your own data from instagram using "user/self" end point
         print "The GET request url is %s" %(request_url)            #display the GET url
@@ -37,6 +41,10 @@ def self_info():
 
 
 def get_self_name():
+
+    """ This function return admin/self/own full name. This information is used in other function """
+    print colored(get_self_name.__doc__,"magenta")
+
     try:
         request_url = (BASE_URL + "users/self/?access_token=%s") % (ACCESS_TOKEN)  # fetching your own data from instagram using "user/self" end point
         #print "The GET request url is %s" % (request_url)  # display the GET url
@@ -99,8 +107,13 @@ def get_media_id(user_id):
         KeyError  # catching keyerror of dictionary user-info
 
 
-#this function display information of friend
+
 def get_user_info(instaname):
+
+    """ This function gets input as instagram username of your friend and check if that username exists or not.
+      if the username exist then this function retrieve the information of that person and display it """
+    print colored(get_user_info.__doc__,"magenta")
+
     user_id=get_user_id(instaname)      #calling get_user_id() fucntion and getting insta id
     if user_id==None:
         print "There is no data in this account"        #print when id is null
@@ -127,8 +140,13 @@ def get_user_info(instaname):
             KeyError        #catching keyerror of dictionary user-info
 
 
-#this fucntion display the recent post in his own profile
+
 def get_own_post():
+
+    """ This function check if you have any recent post on your id or not.
+      if the post exist then this function downloads the recent post using urllib.urlretrieve() function """
+    print colored(get_own_post.__doc__,"magenta")
+
     try:
         request_url=(BASE_URL + "users/self/media/recent/?access_token=%s") % (ACCESS_TOKEN)  #fetching your own data from instagram using "user/self" end point
         print "The GET request url is %s" %(request_url)            #display the GET url
@@ -152,8 +170,13 @@ def get_own_post():
 
 
 
-#this fucntion display the recent post of his friend
+
 def get_user_post(instaname):
+
+    """ This function gets input as instagram username of your friend and check if there is any recent post on his id.
+      if the post exist then this function downloads the recent post using urllib.urlretrieve() function """
+    print colored(get_user_post.__doc__,"magenta")
+
     user_id = get_user_id(instaname)  # calling get_user_id() fucntion and getting insta id
     if user_id == None:
         print "There is no data in this account"  # print when id is null
@@ -182,6 +205,9 @@ def get_user_post(instaname):
 
 
 def get_like_list(instaname):
+    """ This function gets input as instagram username of your friend and get the list of people who has liked the recent post of friend  """
+    print colored(get_like_list.__doc__,"magenta")
+
     user_id=get_user_id(instaname)
     if user_id == None:
         print "There is no data in this account"  # print when id is null
@@ -200,8 +226,9 @@ def get_like_list(instaname):
             try:
                 if(user_likes['meta']['code']) == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
                     if len(user_likes['data']):  # checking if we have anything in data of friend's id
-                        print colored("The person who recently liked pic is %s","green")  % (user_likes['data'][0]['full_name'])
-                        return user_likes['data'][0]['full_name']
+                        for i in range(len(user_likes['data'])):
+                            print colored("The person who recently liked pic is %s","green")  % (user_likes['data'][i]['full_name'])
+                            return user_likes['data'][i]['full_name']
                     else:
                         print colored("No likes!","blue")
                 else:
@@ -212,6 +239,10 @@ def get_like_list(instaname):
 
 
 def like_a_post(instaname):
+    """ This function gets input as instagram username of your friend and then it check if you have already liked the post or not.
+     if you have already liked then i will print "'OH! You have already liked this pic! :)"" otherwise it will like the post  """
+    print colored(like_a_post.__doc__,"magenta")
+
     username=get_self_name()
     username1=get_like_list(instaname)
     if username==username1:
@@ -244,6 +275,9 @@ def like_a_post(instaname):
 
 
 def unlike_a_post(instaname):
+    """ This function gets input as instagram username of your friend and unlike the recent post of your friend """
+    print colored(unlike_a_post.__doc__,"magenta")
+
     user_id = get_user_id(instaname)
     if user_id == None:
         print "There is no data in this account"  # print when id is null
@@ -270,6 +304,8 @@ def unlike_a_post(instaname):
 
 
 def get_comment_list(instaname):
+    """ This function gets input as instagram username of your friend . After that it checks the recent comments of self on that person's recent post and it displays comments """
+    print colored(get_comment_list.__doc__,"magenta")
     user_id = get_user_id(instaname)
     if user_id == None:
         print "There is no data in this account"  # print when id is null
@@ -369,6 +405,55 @@ def delete_negative_comment(instaname):
                 print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
 
 
+
+def choose_post():
+    print colored("Choose one of the following option: ","green")
+    print colored("a.Choose post with minimum likes of user","yellow")
+    print colored("b.Choose any recent post by tag of user","yellow")
+    choice=raw_input("Enter your choice: ")
+    if choice=='a':
+        instaname=raw_input("Enter the username")
+        user_id=get_user_id(instaname)
+        if user_id==None:
+            print colored("Invalid username :(",'red')
+        else:
+            request_url = (BASE_URL + 'users/%s/media/recent/?access_token=%s') % (user_id, ACCESS_TOKEN)
+            print "Get url is: %s" % (request_url)
+            user_media = requests.get(request_url).json()
+            if user_media['meta']['code'] == 200:
+                if len(user_media['data']):
+                    like_list=[]
+                    for i in range(len(user_media['data'])):
+                        likes=user_media['data'][i]['likes']['count']
+                        like_list.append(likes)
+                    min_count=min(like_list)
+                    for i in range(len(user_media['data'])):
+                        if user_media['data'][i]['likes']['count']==min_count:
+                            get_id=user_media['data'][i]['id']
+                            image_name = get_id + '.jpeg'
+                            image_url = user_media['data'][i]['images']['standard_resolution']['url']
+                    urllib.urlretrieve(image_url, image_name)
+                    print colored('Your image has been downloaded! :)', 'green')
+    elif choice=='b':
+        tag_name=raw_input("Enter the tagname without using #")
+        request_url = (BASE_URL + 'tags/%s/media/recent?access_token=%s') % (tag_name,ACCESS_TOKEN)
+        print "GET request url: %s" % (request_url)
+        media_list = requests.get(request_url).json()
+        if media_list['meta']['code']==200:
+            if len(media_list['data']):
+                image_name=media_list['data'][0]['id']+'.jpeg'
+                image_url = media_list['data'][0]['images']['standard_resolution']['url']
+                urllib.urlretrieve(image_url, image_name)
+                print colored('Your image has been downloaded!', 'green')
+            else:
+                print colored("No data available!",'red')
+        else:
+            print colored("The request url is not in accepted state","red")
+    else:
+        print colored("Choose either a or b !",'red')
+
+
+
 def display_pie_chart(instaname):
     user_id = get_user_id(instaname)
     if user_id == None:
@@ -390,7 +475,6 @@ def display_pie_chart(instaname):
                         list.append(comment_list)
 
                     comment = ''.join(list)
-                    print comment
                     blob = TextBlob(comment, analyzer=NaiveBayesAnalyzer())
                     values = [blob.sentiment.p_pos, blob.sentiment.p_neg]
                     labels = ['Positive\nComments', 'Negative\nComments']
@@ -428,7 +512,8 @@ def StartBot():
         print "i.Comment on post\n"
         print "j.Delete negative comments \n"
         print "k.Display pie chart comparing negative and positive comments on a post \n"
-        print "l.Exit the application"
+        print "l.To choose post by minimum likes or tag\n"
+        print "m.Exit the application"
         choice = raw_input(colored("Enter you choice: ","yellow"))        #getting menu choice from user
         if len(choice)>0 and len(choice)<2 and choice.isalpha()==True and choice.isspace()==False :
             if choice == "a":
@@ -460,12 +545,14 @@ def StartBot():
                 insta_username = raw_input(colored("Enter the username on whose id u want to delete the comments:" , "blue"))
                 delete_negative_comment(insta_username)
             elif choice=="k":
-                insta_username = raw_input(colored("Enter the username whose comments-comparison pie chart you want to see" , "blue"))
+                insta_username = raw_input(colored("Enter the username whose comments-comparison pie chart you want to see : " , "blue"))
                 display_pie_chart(insta_username)
             elif choice=="l":
+                choose_post()
+            elif choice=="m":
                 exit()              #exit the program
             else:
-                print colored("wrong choice","red")   #if choice entered is wrong then print
+                print colored("You have entered a wrong choice","red")
         else:
             print colored("You have entered a wrong choice !Try Again","red")
 
