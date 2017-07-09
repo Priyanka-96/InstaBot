@@ -1,12 +1,11 @@
 
 
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-from textblob import TextBlob
-from textblob.sentiments import NaiveBayesAnalyzer
-import urllib   #importing package which fetch data from internet
-import requests    #importing request package
-from termcolor import colored   #import colored package
+import matplotlib.pyplot as plt        #importing matplot lib for pie chart
+from textblob import TextBlob       #import Textblob for semantic analyse of a sentence
+from textblob.sentiments import NaiveBayesAnalyzer          #import Textblob for semantic analyse of a sentence
+import urllib                             #importing package which download the data from given url
+import requests                               #importing request package
+from termcolor import colored                    #import colored package
 
 ACCESS_TOKEN="1572048031.23652d8.52bd5931f05b4c2f92fc6cc9a1e76378"         #my access token
 BASE_URL = 'https://api.instagram.com/v1/'          #instagram base url
@@ -14,8 +13,10 @@ BASE_URL = 'https://api.instagram.com/v1/'          #instagram base url
 
 def self_info():
 
-    """  This function retrieve the information of the admin/self and display it """
-    print colored(self_info.__doc__,"magenta")
+    """
+    This function retrieve the information of the admin/self and display it
+    :return: ---
+    """
 
     try:
         request_url=(BASE_URL + "users/self/?access_token=%s") % (ACCESS_TOKEN)  #fetching your own data from instagram using "user/self" end point
@@ -37,35 +38,42 @@ def self_info():
             print colored("The request url is not in accepted state","red")        #print when status is in "not accepted" state
     except:
         KeyError        #catching the keyerror of dictionary
+        print KeyError      #printing the keyerror
 
 
 
 def get_self_name():
 
-    """ This function return admin/self/own full name. This information is used in other function """
-    print colored(get_self_name.__doc__,"magenta")
+    """
+     :return: Self full name
+    """
 
     try:
-        request_url = (BASE_URL + "users/self/?access_token=%s") % (ACCESS_TOKEN)  # fetching your own data from instagram using "user/self" end point
-        #print "The GET request url is %s" % (request_url)  # display the GET url
-        user_info = requests.get(request_url).json()  # requesting to get the data from the url above mentioned using requests package and using json()
+        request_url = (BASE_URL + "users/self/?access_token=%s") % (ACCESS_TOKEN)    # fetching your own data from instagram using "user/self" end point
+        user_info = requests.get(request_url).json()    # requesting to get the data from the url above mentioned using requests package and using json()
     except:
-        print colored("GET request is not working properly", "red")  # print this when get request isn't correct
+        print colored("GET request is not working properly", "red")      # print this when get request isn't correct
     try:
-        if (user_info['meta']['code']) == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
-            if len(user_info['data']):  # checking if we have anything in data of user
-                return user_info['data']['full_name']
+        if (user_info['meta']['code']) == 200:       # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+            if len(user_info['data']):       # checking if we have anything in data of user
+                return user_info['data']['full_name']       #returning the self fullname to other functions
 
             else:
-                print colored("invalid user!", "red")  # work when  there is no data in our id
+                print colored("invalid user!", "red")       # work when  there is no data in self id
         else:
-            print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
+            print colored("The request url is not in accepted state","red")         # print when status is in "not accepted" state
     except:
         KeyError  # catching the keyerror of dictionary
+        print KeyError         #printing keyerror
 
 
-#this function getting friend's id of instagram
+
 def get_user_id(instaname):
+    """
+
+    :param instaname: this is the username of instagram which client use to login into instagram
+    :return: id : return the id of the respective instaname
+    """
     try:
         request_url= (BASE_URL + "users/search/?q=%s&access_token=%s") % (instaname,ACCESS_TOKEN)   #searching friend's id from instagram using "user/search" end point
         print "The GET request url is %s" % (request_url)       #display the GET url
@@ -79,44 +87,56 @@ def get_user_id(instaname):
                 id= user_info['data'][0]['id']          #storing the id of friend in "id" variable
                 return id           #returning the id
             else:
-                return None
+                return None     #if no data in corresponding instaname then return none
         else:
             print colored("The request url is not in accepted state","red")    #print when status is in "not accepted" state
     except:
         KeyError                    #catching keyerror of dictionary user-info
+        print  KeyError     #printing the key error
 
-    # this function getting friend's id of instagram
+
+
 def get_media_id(user_id):
+    """
+
+    :param user_id: user_id is the id in numeric of the user. It is unique of every user of instagram
+    :return:media_id : this function returns the recent media id of corresponding user_id.
+    """
+
     try:
-        request_url = (BASE_URL + "users/%s/media/recent?&access_token=%s") % (user_id, ACCESS_TOKEN)  # searching friend's id from instagram using "user/search" end point
-        print "The GET request url is %s" % (request_url)  # display the GET url
-        user_info = requests.get(request_url).json()  # requesting to get the data from the url above mentioned using requests package and using json()
+        request_url = (BASE_URL + "users/%s/media/recent?&access_token=%s") % (user_id, ACCESS_TOKEN)  #fetching the recent media of user using user_id and acesstoken
+        print "The GET request url is %s" % (request_url)       # display the GET url
+        user_info = requests.get(request_url).json()        # requesting to get the data from the url above mentioned using requests package and using json()
     except:
         print colored("GET request isn't working properly", "red")  # print this when get request isn't correct
 
     try:
-        if user_info['meta']['code'] == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
-            if len(user_info['data']):  # checking if we have anything in data of friend's if
-                id = user_info['data'][0]['id']  # storing the id of friend in "id" variable
-                return id  # returning the id
+        if user_info['meta']['code'] == 200:       # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+            if len(user_info['data']):       # checking if we have anything in data of friend's if
+                id = user_info['data'][0]['id']        # storing the id of friend in "id" variable
+                return id           # returning the id
             else:
-                return None
+                return None         #if no data in corresponding instaname then return none
         else:
             print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
     except:
         KeyError  # catching keyerror of dictionary user-info
+        print KeyError      #printing key error
 
 
 
 def get_user_info(instaname):
 
-    """ This function gets input as instagram username of your friend and check if that username exists or not.
-      if the username exist then this function retrieve the information of that person and display it """
-    print colored(get_user_info.__doc__,"magenta")
+    """
+    This function gets input as instagram username of your friend and check if that username exists or not.
+      if the username exist then this function retrieve the information of that person and display it
 
+    :param instaname: this is the username of instagram which client use to login into instagram
+    :return: --
+    """
     user_id=get_user_id(instaname)      #calling get_user_id() fucntion and getting insta id
     if user_id==None:
-        print "There is no data in this account"        #print when id is null
+        print colored("ID dont exist","red")        #print when id is null
     else:
         try:
             request_url = (BASE_URL + "users/search/?q=%s&access_token=%s") % (instaname,ACCESS_TOKEN)      #searching friend's id from instagram using "user/search" end point
@@ -130,7 +150,7 @@ def get_user_info(instaname):
                     print colored("ID: %s","green") % user_id            #printing id of friend
                     print colored("USERNAME: %s","green") % user_info['data'][0]['username']     #printing username of friend
                     print colored("FULL NAME OF USER: %s","green") % user_info['data']['fullname']       #printing fullnaame of friend
-                    print colored("BIODATA OF USER: %s","green") % user_info['data']['bio']          #printing biography of self
+                    print colored("BIODATA OF USER: %s","green") % user_info['data']['bio']          #printing biography of friend
                     print colored("MORE WEBSITE : %s","green") % user_info['data']['website']        #printing more website linked to instagram
                 else:
                     print colored("invalid user!","red")           #print when there is no data in friend's id
@@ -138,44 +158,49 @@ def get_user_info(instaname):
                 print colored("The request url is not in accepted state","red")        #print when status is in "not accepted" state
         except:
             KeyError        #catching keyerror of dictionary user-info
+            print KeyError    #printing keyerror
 
 
 
 def get_own_post():
 
-    """ This function check if you have any recent post on your id or not.
-      if the post exist then this function downloads the recent post using urllib.urlretrieve() function """
-    print colored(get_own_post.__doc__,"magenta")
+    """
+    This function check if you have any recent post on your id or not.
+    if the post exist then this function downloads the recent post using urllib.urlretrieve() function
 
+    :return: --
+    """
     try:
-        request_url=(BASE_URL + "users/self/media/recent/?access_token=%s") % (ACCESS_TOKEN)  #fetching your own data from instagram using "user/self" end point
+        request_url=(BASE_URL + "users/self/media/recent/?access_token=%s") % (ACCESS_TOKEN)  #fetching your own recent media from instagram using "user/self" end point
         print "The GET request url is %s" %(request_url)            #display the GET url
         own_post= requests.get(request_url).json()             #requesting to get the data from the url above mentioned using requests package and using json()
     except:
         print colored("GET request is not working properly","red")     #print this when get request isn't correct
     try:
         if(own_post['meta']['code'])==200:     #checking the status code of request. if 200 then it is accepted otherwise the else part will work
-            if len(own_post['data']):              #checking if we have anything in data of user
-                image_name = own_post['data'][0]['id'] + '.jpeg'        #fetching post id from data and storing it in image_name with .jpeg extension
-                image_url = own_post['data'][0]['images']['standard_resolution']['url'] #getting url of post and storing in image_url
-                urllib.urlretrieve(image_url, image_name)           #retriving the image from image_url and saving in image_name
-                print colored('Your image has been downloaded!',"green")  #SUCESS MESSASGE
+            if len(own_post['data']):                 #checking if we have anything in data of user
+                image_name = own_post['data'][0]['id'] + '.jpeg'          #fetching post id from data and storing it in image_name with .jpeg extension
+                image_url = own_post['data'][0]['images']['standard_resolution']['url']     #getting url of post and storing in image_url
+                urllib.urlretrieve(image_url, image_name)            #retriving the image from image_url and saving in image_name with jpeg extension
+                print colored('Your image has been downloaded!',"green")     #SUCESS MESSASGE
             else:
                 print colored('Post does not exist!',"red")   #print if no post in profile
         else:
             print colored("The request url is not in accepted state","red")        #print when status is in "not accepted" state
     except:
         KeyError        #catching the keyerror of dictionary
-
-
+        print KeyError
 
 
 
 def get_user_post(instaname):
+    """
+     This function gets input as instagram username of your friend and check if there is any recent post on his id.
+      if the post exist then this function downloads the recent post using urllib.urlretrieve() function
 
-    """ This function gets input as instagram username of your friend and check if there is any recent post on his id.
-      if the post exist then this function downloads the recent post using urllib.urlretrieve() function """
-    print colored(get_user_post.__doc__,"magenta")
+    :param instaname: this is the username of instagram which client use to login into instagram
+    :return: --
+    """
 
     user_id = get_user_id(instaname)  # calling get_user_id() fucntion and getting insta id
     if user_id == None:
@@ -195,7 +220,7 @@ def get_user_post(instaname):
                     urllib.urlretrieve(image_url, image_name)        #retriving the image from image_url and saving in image_name
                     print colored('Your image has been downloaded!',"green")      #SUCESS MESSASGE
                 else:
-                    print "There is no recent post!"
+                    print "There is no recent post!"        #print if no recent post
             else:
                 print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
         except:
@@ -203,23 +228,25 @@ def get_user_post(instaname):
 
 
 
-
 def get_like_list(instaname):
-    """ This function gets input as instagram username of your friend and get the list of people who has liked the recent post of friend  """
-    print colored(get_like_list.__doc__,"magenta")
+    """
+     get the list of people who has liked the recent post of user
+    :param instaname: this is the username of instagram which client use to login into instagram
+    :return: no. of likes on friend's post
+    """
 
-    user_id=get_user_id(instaname)
+    user_id=get_user_id(instaname)      # calling get_user_id() fucntion and getting insta id
     if user_id == None:
         print "There is no data in this account"  # print when id is null
     else:
-        media_id=get_media_id(user_id)
+        media_id=get_media_id(user_id)      # calling get_media_id() fucntion and getting media id of corresponding user-id
         if media_id == None:
             print "There is no media in this account"  # print when id is null
         else:
             try:
-                request_url= (BASE_URL + "media/%s/likes?access_token=%s") %(media_id,ACCESS_TOKEN)
+                request_url= (BASE_URL + "media/%s/likes?access_token=%s") %(media_id,ACCESS_TOKEN)     #fetching number of likes on recent post of correspoding user_id
                 print "The GET request url is %s" % (request_url)  # display the GET url
-                user_likes= requests.get(request_url).json()
+                user_likes= requests.get(request_url).json()        # requesting to get the data from the url above mentioned using requests package and using json()
 
             except:
                 print colored("GET request is not working properly", "red")  # print when incorrect url
@@ -227,186 +254,221 @@ def get_like_list(instaname):
                 if(user_likes['meta']['code']) == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
                     if len(user_likes['data']):  # checking if we have anything in data of friend's id
                         for i in range(len(user_likes['data'])):
-                            print colored("The person who recently liked pic is %s","green")  % (user_likes['data'][i]['full_name'])
-                            return user_likes['data'][i]['full_name']
+                            print colored("The person who recently liked pic is %s","green")  % (user_likes['data'][i]['full_name'])       #print the name who like your recent pic
+                            return user_likes['data'][i]['full_name']       #return the fullname of the person who has liked your friend's post
                     else:
-                        print colored("No likes!","blue")
+                        print colored("No likes!","red")    #print when no likes
                 else:
                     print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
             except:
-                KeyError
+                KeyError         #catching keyerror
+                print KeyError        #printing key error
 
 
 
 def like_a_post(instaname):
-    """ This function gets input as instagram username of your friend and then it check if you have already liked the post or not.
-     if you have already liked then i will print "'OH! You have already liked this pic! :)"" otherwise it will like the post  """
-    print colored(like_a_post.__doc__,"magenta")
+    """
+     This function gets input as instagram username of your friend and then it check if you have already liked the post or not.
+     if you have already liked then i will print "'OH! You have already liked this pic! :)"" otherwise it will like the post
 
-    username=get_self_name()
-    username1=get_like_list(instaname)
-    if username==username1:
-        print colored("OH! You have already liked this pic! :) ","green")
+    :param instaname: this is the username of instagram which client use to login into instagram
+    :return: --
+    """
+
+    username=get_self_name()        #calling get_self_name()
+    username1=get_like_list(instaname)          #calling get_like_list()
+    if username==username1:         #comparing both values
+        print colored("OH! You have already liked this pic! :) ","green")           #print if already liked the pic
     else:
-        user_id = get_user_id(instaname)
+        user_id = get_user_id(instaname)        #calling get_user_id
         if user_id == None:
-            print "There is no data in this account"  # print when id is null
+            print colored("There is no data in this account","red")    # print when user id is null
         else:
-            media_id = get_media_id(user_id)
-            if media_id == None:
-                print "There is no media in this account"  # print when id is null
+            media_id = get_media_id(user_id)        #calling get_media_id()
+            if media_id == None:                #check if media id none
+                print colored("There is no media in this account","red")  # print when media id is null
             else:
                 try:
-                    request_url = (BASE_URL + 'media/%s/likes') % (media_id)
-                    payload = {"access_token": ACCESS_TOKEN}
+                    request_url = (BASE_URL + 'media/%s/likes') % (media_id)        #url to like the post using media id
+                    payload = {"access_token": ACCESS_TOKEN}        # payload as a dictionary
                     print 'POST request url : %s' % (request_url)       # display the POST url
-                    post_like = requests.post(request_url, payload).json()
+                    post_like = requests.post(request_url, payload).json()      #posting  the data to the url above mentioned using requests package and using json()
                 except:
                     print colored("POST request is not working properly", "red")  # print when incorrect url
 
                 try:
-                    if post_like['meta']['code'] == 200:
-                        print colored("SUCESSFULLY LIKED THE POST","green")
+                    if post_like['meta']['code'] == 200:        # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                        print colored("SUCESSFULLY LIKED THE POST","green")     #print if post is sucessfully liked
                     else:
-                        print colored("You couldn't like the POST :( ","red")
+                        print colored("You couldn't like the POST :( ","red")           #printing if post is not sucessfully liked
                 except:
-                    KeyError
+                    KeyError        #catch keyerror
+                    print KeyError      #printing keyerror
 
 
 
 def unlike_a_post(instaname):
-    """ This function gets input as instagram username of your friend and unlike the recent post of your friend """
-    print colored(unlike_a_post.__doc__,"magenta")
+    """
+     This function gets input as instagram username of your friend and unlike the recent post of your friend
 
-    user_id = get_user_id(instaname)
+    :param instaname:  this is the username of instagram which client use to login into instagram
+    :return: --
+    """
+
+    user_id = get_user_id(instaname)         #calling get_user_id()
     if user_id == None:
         print "There is no data in this account"  # print when id is null
     else:
-        media_id = get_media_id(user_id)
+        media_id = get_media_id(user_id)        #calling get_media_id()
         if media_id == None:
-            print "There is no media in this account"  # print when id is null
+            print "There is no media in this account"  # print when media id is null
         else:
             try:
-                request_url = (BASE_URL + 'media/%s/likes?access_token=%s') % (media_id,ACCESS_TOKEN)
-                post_del = requests.delete(request_url).json()
+                request_url = (BASE_URL + 'media/%s/likes?access_token=%s') % (media_id,ACCESS_TOKEN)      #url of liking the recent post corresponding to media id
+                post_del = requests.delete(request_url).json()      #deleteing the data to the url above mentioned using requests package and using json()
             except:
                 print colored("DELETE request is not working properly", "red")  # print when incorrect url
 
             try:
-                if post_del['meta']['code'] == 200:
-                    print colored("SUCESSFULLY UNLIKED THE POST", "green")
+                if post_del['meta']['code'] == 200:       # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                    print colored("SUCESSFULLY UNLIKED THE POST", "green")      #print if post is sucessfully unliked
                 else:
-                    print colored("You couldn't unlike the POST :( ", "red")
+                    print colored("You couldn't unlike the POST :( ", "red")          #printing if post is not sucessfully unliked
             except:
-                KeyError
-
+                KeyError        #catching keyerror
+                print KeyError     #printing keyerror
 
 
 
 def get_comment_list(instaname):
-    """ This function gets input as instagram username of your friend . After that it checks the recent comments of self on that person's recent post and it displays comments """
-    print colored(get_comment_list.__doc__,"magenta")
-    user_id = get_user_id(instaname)
+    """
+     it checks the recent comments of self on user's recent post and it displays comments
+    :param instaname: this is the username of instagram which client use to login into instagram
+    :return: --
+    """
+    user_id = get_user_id(instaname)        #calling get_user_id()
     if user_id == None:
         print "There is no data in this account"  # print when id is null
     else:
-        media_id = get_media_id(user_id)
+        media_id = get_media_id(user_id)        #get_media_id called to get recent media of user
         if media_id == None:
-            print "There is no media in this account"  # print when id is null
+            print "There is no media in this account"  # print when media id is null
         else:
             try:
-                request_url = (BASE_URL + "media/%s/comments?access_token=%s") % (media_id, ACCESS_TOKEN)
+                request_url = (BASE_URL + "media/%s/comments?access_token=%s") % (media_id, ACCESS_TOKEN)       #url of fetching the comments on the recent post corresponding to media id
                 print "The GET request url is %s" % (request_url)  # display the GET url
-                user_comment = requests.get(request_url).json()
+                user_comment = requests.get(request_url).json()     #getting the data of the url above mentioned using requests package and using json()
 
             except:
                 print colored("GET request is not working properly", "red")  # print when incorrect url
             try:
                 if (user_comment['meta']['code']) == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
                     if len(user_comment['data']):  # checking if we have anything in data of friend's id
-                        for comnt in range(len(user_comment['data'])):
+                        for comnt in range(len(user_comment['data'])):      #for loop works till the data available in user_comment
+                            #fetching the comments and fullname of person who has commented on media
                             print colored(" Comment : %s \n Posted by : %s", "green") % (user_comment['data'][comnt]['text'],user_comment['data'][comnt]['from']['full_name'])
                     else:
-                        print colored("There is no recent comment!", "red")
+                        print colored("There is no recent comment!", "red")     #print when no recent comments are there
                 else:
                     print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
             except:
-                KeyError
+                KeyError        #catching Key error
+                print KeyError  #printing keyerror
+
 
 
 def comment_on_post(instaname):
-    user_id = get_user_id(instaname)
+    """
+    this function make comment on recent post of user
+    :param instaname:this is the username of instagram which client use to login into instagram
+    :return:--
+    """
+    user_id = get_user_id(instaname)        #calling get_user_id()
     if user_id == None:
         print "There is no data in this account"  # print when id is null
     else:
-        media_id = get_media_id(user_id)
+        media_id = get_media_id(user_id)         #get_media_id called to get recent media of user
         if media_id == None:
-            print "There is no media in this account"  # print when id is null
+            print "There is no media in this account"  # print when  media id is null
         else:
             try:
-                comment = raw_input("Enter you comment= ")
-                payload = {"access_token": ACCESS_TOKEN, "text": comment}
-                request_url = (BASE_URL + 'media/%s/comments') % (media_id)
-                print "POST request url : %s" % (request_url)
-                post_comment = requests.post(request_url, payload).json()
+                comment = raw_input("Enter you comment= ")      #taking the comment you want to post as input
+                payload = {"access_token": ACCESS_TOKEN, "text": comment}       #creating payload dictionary as passing accesstoken and comment text in it
+                request_url = (BASE_URL + 'media/%s/comments') % (media_id)     #url of posting the comments on the recent post corresponding to media id
+                print "POST request url : %s" % (request_url)       #printing post url
+                post_comment = requests.post(request_url, payload).json()       #posting the data of the url above mentioned using requests package and using json()
             except:
-                print colored("Incorrect URL!","red")
+                print colored("Incorrect URL!","red")       #print when incorect request url
             try:
 
-                if post_comment['meta']['code'] == 200:
-                    print colored("Sucessfully posted the comment! :)","green")
+                if post_comment['meta']['code'] == 200:     # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                    print colored("Sucessfully posted the comment! :)","green")     #print when successfull  posted comments
                 else:
-                    print colored("Failed to post!:( TRY AGAIN","red")
+                    print colored("Failed to post!:( TRY AGAIN","red")      #printing when failed to post the comment
             except:
-                KeyError
+                KeyError        #catching Keyerror
+                print KeyError      #printing keyerror
 
 
 
 def delete_negative_comment(instaname):
-    user_id = get_user_id(instaname)
+    """
+
+    :param instaname:  this is the username of instagram which client use to login into instagram
+    :return: --
+    """
+    user_id = get_user_id(instaname)        #calling get_user_id()
     if user_id == None:
         print "There is no data in this account"  # print when id is null
     else:
-        media_id = get_media_id(user_id)
+        media_id = get_media_id(user_id)        #get_media_id called to get recent media of user
         if media_id == None:
-            print "There is no media in this account"  # print when id is null
+            print "There is no media in this account"  # print when media id is null
         else:
-            request_url = (BASE_URL + 'media/%s/comments/?access_token=%s') % (media_id, ACCESS_TOKEN)
-            print 'GET request url : %s' % (request_url)
-            comment_info = requests.get(request_url).json()
+            try:
+                request_url = (BASE_URL + 'media/%s/comments/?access_token=%s') % (media_id, ACCESS_TOKEN)       #url of fetching the comments on the recent post corresponding to media id
+                print 'GET request url : %s' % (request_url)   #print get url
+                comment_info = requests.get(request_url).json()     #getting the data of the url above mentioned using requests package and using json()
+            except:
+                print colored("GET request is not working properly", "red")  # print when incorrect url
 
-            if comment_info['meta']['code'] == 200:
-                if len(comment_info['data']):
-                    for cmnt in range(len(comment_info['data'])):
-                        comment_list=comment_info['data'][cmnt]['text']
-                        comment_id=comment_info['data'][cmnt]['id']
-                        blob = TextBlob(comment_list, analyzer=NaiveBayesAnalyzer())
-                        if (blob.sentiment.p_neg > blob.sentiment.p_pos):
-                            print colored("Your comment is %s :(" ,"red") %comment_list
-                            try:
-                                request_url = (BASE_URL + 'media/%s/comments/%s/?access_token=%s') %(media_id,comment_id,ACCESS_TOKEN)
-                                print "Delete request url :%s" % (request_url)
-                                del_info= requests.delete(request_url).json()
-                            except:
-                                print colored("Request URL not coorect!","red")
-                            try:
-                                if del_info['meta']['code'] == 200:
-                                    print colored("Comment deleted :) ","green")
-                                else:
-                                    print colored("Unable to delete comment :(","red")
-                            except:
-                                KeyError
+            try:
+                if comment_info['meta']['code'] == 200:     # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                    if len(comment_info['data']):       # checking if we have anything in data of friend's id
+                        for cmnt in range(len(comment_info['data'])):       #for loop works till the data available in comment_info
+                            comment_list=comment_info['data'][cmnt]['text']     #fetching comments
+                            comment_id=comment_info['data'][cmnt]['id']     #fetching comment id
+                            blob = TextBlob(comment_list, analyzer=NaiveBayesAnalyzer())        #analysing the comment sentiment
+                            if (blob.sentiment.p_neg > blob.sentiment.p_pos):       #checking if the ratio of negative meaning of greater than positive
+                                print colored("Your comment is %s :(" ,"red") %comment_list     #print if negtive comment
+                                try:
+                                    request_url = (BASE_URL + 'media/%s/comments/%s/?access_token=%s') %(media_id,comment_id,ACCESS_TOKEN)  #url for getting the commments
+                                    print "Delete request url :%s" % (request_url)      #dislay url
+                                    del_info= requests.delete(request_url).json()       #deleting the data of the url above mentioned using requests package and using json()
+                                except:
+                                    print colored("Request URL not coorect!","red")     #print when url not correct
+                                try:
+                                    if del_info['meta']['code'] == 200:     # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                                        print colored("Comment deleted :) ","green")        #print when sucessful in deleting negative comments
+                                    else:
+                                        print colored("Unable to delete comment :(","red")      #print when unsucess in deleting comments
+                                except:
+                                    KeyError  #catching keyerror
+                                    print KeyError  #printing key error
 
-                        else:
-                            print colored("%s is a Positive comment :) ","green") % (comment_list)
+                            else:
+                                print colored("%s is a Positive comment :) ","green") % (comment_list)      #print when its a positive commment
+                    else:
+                        print colored("No comments present on this post","red")     #print when no comments present on post
                 else:
-                    print colored("No comments present on this post","red")
-            else:
-                print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
+                    print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
+            except:
+                KeyError    #catching keyerror
+                print KeyError  #printing keyerror
 
 
 
-def choose_post():
+def choose():
     print colored("Choose one of the following option: ","green")
     print colored("a.Choose post with minimum likes of user","yellow")
     print colored("b.Choose any recent post by tag of user","yellow")
@@ -455,43 +517,50 @@ def choose_post():
 
 
 def display_pie_chart(instaname):
-    user_id = get_user_id(instaname)
+    """
+    this fucntion compares the ratio of postive and negative posts on a post and displays a pie chart comparing the percentages
+    :param instaname:  this is the username of instagram which client use to login into instagram
+    :return: --
+    """
+
+    user_id = get_user_id(instaname)        #calling get_user_id()
     if user_id == None:
         print "There is no data in this account"  # print when id is null
     else:
-        media_id = get_media_id(user_id)
+        media_id = get_media_id(user_id)        #get_media_id called to get recent media of user
         if media_id == None:
-            print "There is no media in this account"  # print when id is null
+            print "There is no media in this account"  # print when media id is null
         else:
-            request_url = (BASE_URL + 'media/%s/comments/?access_token=%s') % (media_id, ACCESS_TOKEN)
-            print 'GET request url : %s' % (request_url)
-            comment_info = requests.get(request_url).json()
+            request_url = (BASE_URL + 'media/%s/comments/?access_token=%s') % (media_id, ACCESS_TOKEN)  #url of fetching the comments on the recent post corresponding to media id
+            print 'GET request url : %s' % (request_url)      #print get url
+            comment_info = requests.get(request_url).json()     #getting the data of the url above mentioned using requests package and using json()
 
-            if comment_info['meta']['code'] == 200:
-                if len(comment_info['data']):
-                    list=[]
-                    for cmnt in range(len(comment_info['data'])):
-                        comment_list = comment_info['data'][cmnt]['text']
-                        list.append(comment_list)
+            if comment_info['meta']['code'] == 200:      # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                if len(comment_info['data']):        # checking if we have anything in data of friend's id
+                    list=[]             #declaring empty string
+                    for cmnt in range(len(comment_info['data'])):       #for loop works till the data available in comment_info
+                        comment_list = comment_info['data'][cmnt]['text']            #fetching comments
+                        list.append(comment_list)       #append the comments in list
 
-                    comment = ''.join(list)
-                    blob = TextBlob(comment, analyzer=NaiveBayesAnalyzer())
-                    values = [blob.sentiment.p_pos, blob.sentiment.p_neg]
-                    labels = ['Positive\nComments', 'Negative\nComments']
-
-                    fig = plt.figure()
-                    fig.patch.set_facecolor('pink')
-                    fig.patch.set_alpha(0.7)
-
-                    col = ['blue', 'yellow']
+                    comment = ''.join(list)     #converting list into string
+                    blob = TextBlob(comment, analyzer=NaiveBayesAnalyzer())     #analysing the comment sentiment
+                    values = [blob.sentiment.p_pos, blob.sentiment.p_neg]       #storing the postive rativo and negative ratio in a list
+                    labels = ['Positive\nComments', 'Negative\nComments']       #label list for pie chart
+                    fig = plt.figure()          #calling figure() funtion of plt
+                    fig.patch.set_facecolor('pink')     #setting  facecolor to pink
+                    fig.patch.set_alpha(0.7)        #setting occupacy to 0.7
+                    col = ['blue', 'yellow']        #list of color user respective to list of values
+                    #plt.pie is used to plot pie chart. values are the values of slices, labels are label corresponding to value, startange is the from where we can
+                    #start printing the slice, autopct calculate percentage, colors is color of corresponding slice, shadow is 3D view, explode is when
+                    #one of the slice is coming
                     plt.pie(values, labels=labels, startangle=90, autopct='%1.1f%%', colors=col, shadow=True,explode=(0, 0.1))
-                    plt.title("Negative VS Positive Comments \n (Percentage Comparison)")
-                    plt.legend()
-                    plt.show()
-                    StartBot()
+                    plt.title("Negative VS Positive Comments \n (Percentage Comparison)")       #printing title of pie chart
+                    plt.legend()        #legend places a legend on various types of graphs (line plots, bar graphs, pie charts, etc.).
+                                        # For each pie chart plotted, the legend shows a sample of the line type, marker symbol, and color beside the text label you specify.
+                    plt.show()      #show the pie chart
 
                 else:
-                    print colored("No comments present on this post", "red")
+                    print colored("No comments present on this post", "red")        #print if no comments on this post
             else:
                 print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
 
@@ -515,47 +584,46 @@ def StartBot():
         print "l.To choose post by minimum likes or tag\n"
         print "m.Exit the application"
         choice = raw_input(colored("Enter you choice: ","yellow"))        #getting menu choice from user
-        if len(choice)>0 and len(choice)<2 and choice.isalpha()==True and choice.isspace()==False :
+        if len(choice)>0 and len(choice)<2 and choice.isalpha()==True and choice.isspace()==False :   #check if correct choice entered
             if choice == "a":
-                self_info()         #if choice is "a" then self_info() called
+                self_info()         #if choice is "a" then self_info() is called
             elif choice == "b":
                 insta_username = raw_input(colored("Enter the username of the user: ","blue"))
-                get_user_info(insta_username)     #if choice is "b" then get_user_info() called and friend's insta name is passed as parameter
+                get_user_info(insta_username)     #if choice is "b" then get_user_info() is called and input insta name is passed as parameter
             elif choice == "c":
-                get_own_post()      #if choice is "c" then get_own_post() called
+                get_own_post()      #if choice is "c" then get_own_post() is called
             elif choice == "d":
                 insta_username = raw_input(colored("Enter the username of the user: ", "blue"))
-                get_user_post(insta_username)  # if choice is "b" then get_user_post() called and friend's insta name is passed as parameter
+                get_user_post(insta_username)  # if choice is "b" then get_user_post() called and input insta name is passed as parameter
             elif choice=="e":
                 insta_username = raw_input(colored("Enter the username of the user: ", "blue"))
-                get_like_list(insta_username)
+                get_like_list(insta_username)       # if choice is "c" then get_like_post() called and input insta name is passed as parameter
             elif choice=="f":
                 insta_username = raw_input(colored("Enter the username whose post you want to like: ", "blue"))
-                like_a_post(insta_username)
+                like_a_post(insta_username)     # if choice is "f" then like_a_post() called and input insta name is passed as parameter
             elif choice == "g":
                 insta_username = raw_input(colored("Enter the username whose post you want to unlike: ", "blue"))
-                unlike_a_post(insta_username)
+                unlike_a_post(insta_username)       # if choice is "g" then unlike_a_post() called and input insta name is passed as parameter
             elif choice == "h":
                 insta_username = raw_input(colored("Enter the username whose comment you want to see on recent post: ", "blue"))
-                get_comment_list(insta_username)
+                get_comment_list(insta_username)        # if choice is "h" then get_comment_list() called and input insta name is passed as parameter
             elif choice == "i":
                 insta_username = raw_input(colored("Enter the username whose post you want to comment on: ", "blue"))
-                comment_on_post(insta_username)
+                comment_on_post(insta_username)     # if choice is "i" then comment_on_post() called and input insta name is passed as parameter
             elif choice=="j":
                 insta_username = raw_input(colored("Enter the username on whose id u want to delete the comments:" , "blue"))
-                delete_negative_comment(insta_username)
+                delete_negative_comment(insta_username)     # if choice is "j" then delete_negative_comment() called and input insta name is passed as parameter
             elif choice=="k":
                 insta_username = raw_input(colored("Enter the username whose comments-comparison pie chart you want to see : " , "blue"))
-                display_pie_chart(insta_username)
+                display_pie_chart(insta_username)       # if choice is "k" then display_pie_chart() called and input insta name is passed as parameter
             elif choice=="l":
-                choose_post()
+                choose()       #choose function called
             elif choice=="m":
                 exit()              #exit the program
             else:
-                print colored("You have entered a wrong choice","red")
+                print colored("You have entered a wrong choice","red")      #print when wrong choice entered
         else:
-            print colored("You have entered a wrong choice !Try Again","red")
+            print colored("You have entered a wrong choice !Try Again","red")       #print when wrong choice entered
 
-
-StartBot()
+StartBot()      #recall the StartBot()
 
