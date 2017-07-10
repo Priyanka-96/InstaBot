@@ -220,11 +220,12 @@ def get_user_post(instaname):
                     urllib.urlretrieve(image_url, image_name)        #retriving the image from image_url and saving in image_name
                     print colored('Your image has been downloaded!',"green")      #SUCESS MESSASGE
                 else:
-                    print "There is no recent post!"        #print if no recent post
+                    print colored("There is no recent post!","red")        #print if no recent post
             else:
                 print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
         except:
             KeyError  # catching keyerror of dictionary user-info
+            print KeyError    #printing keyerror
 
 
 
@@ -413,55 +414,81 @@ def comment_on_post(instaname):
 
 def delete_negative_comment(instaname):
     """
-
+    THIS function deleted the negative comments on post by analyisng  the comment using textblob
     :param instaname:  this is the username of instagram which client use to login into instagram
     :return: --
     """
-    user_id = get_user_id(instaname)        #calling get_user_id()
+    user_id = get_user_id(instaname)                                #calling get_user_id()
     if user_id == None:
-        print "There is no data in this account"  # print when id is null
+        print "There is no data in this account"                 # print when id is null
     else:
-        media_id = get_media_id(user_id)        #get_media_id called to get recent media of user
+        media_id = get_media_id(user_id)                         #get_media_id called to get recent media of user
         if media_id == None:
-            print "There is no media in this account"  # print when media id is null
+            print "There is no media in this account"                    # print when media id is null
         else:
             try:
                 request_url = (BASE_URL + 'media/%s/comments/?access_token=%s') % (media_id, ACCESS_TOKEN)       #url of fetching the comments on the recent post corresponding to media id
-                print 'GET request url : %s' % (request_url)   #print get url
-                comment_info = requests.get(request_url).json()     #getting the data of the url above mentioned using requests package and using json()
+                print 'GET request url : %s' % (request_url)                                                #print get url
+                comment_info = requests.get(request_url).json()                                      #getting the data of the url above mentioned using requests package and using json()
             except:
                 print colored("GET request is not working properly", "red")  # print when incorrect url
 
             try:
-                if comment_info['meta']['code'] == 200:     # checking the status code of request. if 200 then it is accepted otherwise the else part will work
-                    if len(comment_info['data']):       # checking if we have anything in data of friend's id
-                        for cmnt in range(len(comment_info['data'])):       #for loop works till the data available in comment_info
-                            comment_list=comment_info['data'][cmnt]['text']     #fetching comments
-                            comment_id=comment_info['data'][cmnt]['id']     #fetching comment id
+                if comment_info['meta']['code'] == 200:                                      # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                    if len(comment_info['data']):                                               # checking if we have anything in data of friend's id
+                        for cmnt in range(len(comment_info['data'])):                           #for loop works till the data available in comment_info
+                            comment_list=comment_info['data'][cmnt]['text']                     #fetching comments
+                            comment_id=comment_info['data'][cmnt]['id']                          #fetching comment id
                             blob = TextBlob(comment_list, analyzer=NaiveBayesAnalyzer())        #analysing the comment sentiment
-                            if (blob.sentiment.p_neg > blob.sentiment.p_pos):       #checking if the ratio of negative meaning of greater than positive
+                            if (blob.sentiment.p_neg > blob.sentiment.p_pos):                    #checking if the ratio of negative meaning of greater than positive
                                 print colored("Your comment is %s :(" ,"red") %comment_list     #print if negtive comment
                                 try:
                                     request_url = (BASE_URL + 'media/%s/comments/%s/?access_token=%s') %(media_id,comment_id,ACCESS_TOKEN)  #url for getting the commments
-                                    print "Delete request url :%s" % (request_url)      #dislay url
-                                    del_info= requests.delete(request_url).json()       #deleting the data of the url above mentioned using requests package and using json()
+                                    print "Delete request url :%s" % (request_url)               #dislay url
+                                    del_info= requests.delete(request_url).json()                   #deleting the data of the url above mentioned using requests package and using json()
                                 except:
-                                    print colored("Request URL not coorect!","red")     #print when url not correct
-                                try:
-                                    if del_info['meta']['code'] == 200:     # checking the status code of request. if 200 then it is accepted otherwise the else part will work
-                                        print colored("Comment deleted :) ","green")        #print when sucessful in deleting negative comments
+                                    print colored("Request URL not coorect!","red")              #print when url not correct
+                                if del_info['meta']['code'] == 200:                             # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                                    print colored("Comment deleted :) ","green")                    #print when sucessful in deleting negative comments
+                                else:
+                                    print colored("Unable to delete comment :(","red")              #print when unsucess in deleting comments
+                            elif (blob.sentiment.p_neg==blob.sentiment.p_pos):                      #if comment have 50-50 ratio of positive and negative sentiment
+                                print colored("Your comment is 50% positive and 50% negative","red")
+                                choice=raw_input(colored("1.Do you want to delete this comment ? \n 2.Do you want to download this image? \n 3.Do want to go back to Main menu? ","blue"))
+                                if choice=="1":
+                                    try:
+                                        request_url = (BASE_URL + 'media/%s/comments/%s/?access_token=%s') % (media_id, comment_id, ACCESS_TOKEN)  # url for getting the commments
+                                        print "Delete request url :%s" % (request_url)                       # dislay url
+                                        del_info = requests.delete(request_url).json()                       # deleting the data of the url above mentioned using requests package and using json()
+                                    except:
+                                        print colored("Request URL not coorect!", "red")                 # print when url not correct
+                                    if del_info['meta']['code'] == 200:                                  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                                        print colored("Comment deleted :) ","green")                    # print when sucessful in deleting negative comments
                                     else:
-                                        print colored("Unable to delete comment :(","red")      #print when unsucess in deleting comments
-                                except:
-                                    KeyError  #catching keyerror
-                                    print KeyError  #printing key error
-
+                                        print colored("Unable to delete comment :(","red")               # print when unsucess in deleting comments
+                                elif choice=='2':
+                                    try:
+                                        request_url = (BASE_URL + 'users/%s/media/recent?access_token=%s') % (user_id, ACCESS_TOKEN)  # url for the recent media using userid
+                                        print "get request url :%s" % (request_url)                                                  # dislay url
+                                        get_img = requests.get(request_url).json()                               # deleting the data of the url above mentioned using requests package and using json()
+                                    except:
+                                        print colored("Request URL not coorect!", "red")                        # print when url not correct
+                                    if (get_img['meta']['code']) == 200:                                             # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                                        if len(get_img['data']):                                                     # checking if we have anything in data of friend's id
+                                            image_name = get_img['data'][0]['id'] + '.jpeg'                         # fetching post id from data and storing it in image_name with .jpeg extension
+                                            image_url =get_img['data'][0]['images']['standard_resolution']['url']               # getting url of post and storing in image_url
+                                            urllib.urlretrieve(image_url,image_name)                                    # retriving the image from image_url and saving in image_name
+                                            print colored('Your image has been downloaded! :) ', "green")               # SUCCESS MESSASGE
+                                    elif choice=='3':
+                                        StartBot()
+                                else:
+                                    print colored("You entered a wrong choice !","red")                                #print when wrong choicce entered
                             else:
-                                print colored("%s is a Positive comment :) ","green") % (comment_list)      #print when its a positive commment
+                                print colored("%s is a Positive comment :) ","green") % (comment_list)              #print when its a positive commment
                     else:
-                        print colored("No comments present on this post","red")     #print when no comments present on post
+                        print colored("No comments present on this post","red")                           #print when no comments present on post
                 else:
-                    print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
+                    print colored("The request url is not in accepted state","red")                  # print when status is in "not accepted" state
             except:
                 KeyError    #catching keyerror
                 print KeyError  #printing keyerror
@@ -479,41 +506,101 @@ def choose():
         if user_id==None:
             print colored("Invalid username :(",'red')
         else:
-            request_url = (BASE_URL + 'users/%s/media/recent/?access_token=%s') % (user_id, ACCESS_TOKEN)
-            print "Get url is: %s" % (request_url)
-            user_media = requests.get(request_url).json()
-            if user_media['meta']['code'] == 200:
-                if len(user_media['data']):
-                    like_list=[]
-                    for i in range(len(user_media['data'])):
-                        likes=user_media['data'][i]['likes']['count']
-                        like_list.append(likes)
-                    min_count=min(like_list)
-                    for i in range(len(user_media['data'])):
-                        if user_media['data'][i]['likes']['count']==min_count:
-                            get_id=user_media['data'][i]['id']
-                            image_name = get_id + '.jpeg'
-                            image_url = user_media['data'][i]['images']['standard_resolution']['url']
-                    urllib.urlretrieve(image_url, image_name)
-                    print colored('Your image has been downloaded! :)', 'green')
+            try:
+                request_url = (BASE_URL + 'users/%s/media/recent/?access_token=%s') % (user_id, ACCESS_TOKEN)
+                print "Get url is: %s" % (request_url)
+                user_media = requests.get(request_url).json()
+            except:
+                print colored("GET request is not working properly", "red")  # print when incorrect url
+
+            try:
+                if user_media['meta']['code'] == 200:
+                    if len(user_media['data']):
+                        like_list=[]
+                        for i in range(len(user_media['data'])):
+                            likes=user_media['data'][i]['likes']['count']
+                            url=user_media['data'][i]['images']['standard_resolution']['url']
+                            like_list.append(likes)
+                        min_count=min(like_list)
+                        print colored("Least number of likes is %s" ,"magenta")%(min_count)
+                        choice=raw_input("What do you want to do with this post with least likes? \n 1. Download this image?\n 2. Like this post? \n 3.Return to main menu? ")
+                        if choice=="1":
+                            for i in range(len(user_media['data'])):
+                                if user_media['data'][i]['likes']['count']==min_count:
+                                    get_id=user_media['data'][i]['id']
+                                    image_name = get_id + '.jpeg'
+                                    image_url = user_media['data'][i]['images']['standard_resolution']['url']
+                            urllib.urlretrieve(image_url, image_name)
+                            print colored('Your image has been downloaded! :)', 'green')
+                        elif choice=="2":
+                            like_a_post(instaname)
+                        elif choice=="3":
+                            StartBot()
+                        else:
+                            print colored("Enter the correct choice :( ","red")
+                    else:
+                        print colored("There is no data :(", "red")  # print when no recent comments are there
+                else:
+                    print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
+            except:
+                KeyError  # catching Key error
+                print KeyError  # printing keyerror
+
     elif choice=='b':
-        tag_name=raw_input("Enter the tagname without using #")
-        request_url = (BASE_URL + 'tags/%s/media/recent?access_token=%s') % (tag_name,ACCESS_TOKEN)
-        print "GET request url: %s" % (request_url)
-        media_list = requests.get(request_url).json()
-        if media_list['meta']['code']==200:
-            if len(media_list['data']):
-                image_name=media_list['data'][0]['id']+'.jpeg'
-                image_url = media_list['data'][0]['images']['standard_resolution']['url']
-                urllib.urlretrieve(image_url, image_name)
-                print colored('Your image has been downloaded!', 'green')
-            else:
-                print colored("No data available!",'red')
+        username=raw_input(colored("enter the username whose post you want to choose using caption?","blue"))
+        user_id=get_user_id(username)
+        if user_id==None:
+            print colored("There is no data in this account","red")
         else:
-            print colored("The request url is not in accepted state","red")
+            request_url = (BASE_URL + 'users/%s/media/recent?access_token=%s') % (user_id,ACCESS_TOKEN)
+            print "GET request url: %s" % (request_url)
+            media_list = requests.get(request_url).json()
+            if media_list['meta']['code']==200:
+                if len(media_list['data']):
+                    word=raw_input(colored("Enter the word you want to search in caption : ","green"))
+                    list=[]
+                    for i in range(len(media_list['data'])):
+                        caption=media_list['data'][i]['caption']['text']
+                        list.append(caption)
+                    for i in range(len(list)):
+                        if word in list[i]:
+                            print list[i]
+                else:
+                    print colored("No data available!",'red')
+            else:
+                print colored("The request url is not in accepted state","red")
     else:
         print colored("Choose either a or b !",'red')
 
+
+
+def recent_media_liked():
+    """
+    This function download the recent image liked by you/self.
+    :return: --
+    """
+
+    print colored("Hi! Recent post liked by you is downloading...","cyan")
+    try:
+        request_url = (BASE_URL + "users/self/media/liked?access_token=%s") %( ACCESS_TOKEN)  # getting like from instagram using "user/self/media/like" end point
+        print "The GET request url is %s" % (request_url)  # display the GET url
+        liked_post = requests.get(request_url).json()  # requesting to get the data from the url above mentioned using requests package and using json()
+    except:
+        print colored("GET request is not working properly", "red")  # print when incorrect url
+    try:
+        if (liked_post['meta']['code']) == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+            if len(liked_post['data']):  # checking if we have anything in data of friend's id
+                image_name = liked_post['data'][0]['id'] + '.jpeg'  # fetching post id from data and storing it in image_name with .jpeg extension
+                image_url = liked_post['data'][0]['images']['standard_resolution']['url']  # getting url of post and storing in image_url
+                urllib.urlretrieve(image_url, image_name)  # retriving the image from image_url and saving in image_name
+                print colored('Your image has been downloaded!', "green")  # SUCCESS MESSASGE
+            else:
+                print colored("You did'nt liked any post recently !",'red')  # print if no recent post
+        else:
+            print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
+    except:
+        KeyError  # catching keyerror of dictionary user-info
+        print KeyError #printing key error
 
 
 def display_pie_chart(instaname):
@@ -582,7 +669,8 @@ def StartBot():
         print "j.Delete negative comments \n"
         print "k.Display pie chart comparing negative and positive comments on a post \n"
         print "l.To choose post by minimum likes or tag\n"
-        print "m.Exit the application"
+        print "m.To get the recent media liked by the user \n"
+        print "n.Exit the application"
         choice = raw_input(colored("Enter you choice: ","yellow"))        #getting menu choice from user
         if len(choice)>0 and len(choice)<2 and choice.isalpha()==True and choice.isspace()==False :   #check if correct choice entered
             if choice == "a":
@@ -619,6 +707,8 @@ def StartBot():
             elif choice=="l":
                 choose()       #choose function called
             elif choice=="m":
+                recent_media_liked()        #calling recent_media_liked() function
+            elif choice=="n":
                 exit()              #exit the program
             else:
                 print colored("You have entered a wrong choice","red")      #print when wrong choice entered
