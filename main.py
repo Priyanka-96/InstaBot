@@ -139,7 +139,7 @@ def get_user_info(instaname):
         print colored("ID dont exist","red")        #print when id is null
     else:
         try:
-            request_url = (BASE_URL + "users/search/?q=%s&access_token=%s") % (instaname,ACCESS_TOKEN)      #searching friend's id from instagram using "user/search" end point
+            request_url = (BASE_URL + "users/%s/?access_token=%s") % (user_id,ACCESS_TOKEN)      #searching friend's id from instagram using "user/search" end point
             print "The GET request url is %s" % (request_url)               #display the GET url
             user_info = requests.get(request_url).json()            #requesting to get the data from the url above mentioned using requests package and using json()
         except:
@@ -147,11 +147,10 @@ def get_user_info(instaname):
         try:
             if (user_info['meta']['code']) == 200:      #checking the status code of request. if 200 then it is accepted otherwise the else part will work
                 if len(user_info['data']):                  #checking if we have anything in data of friend's id
-                    print colored("ID: %s","green") % user_id            #printing id of friend
-                    print colored("USERNAME: %s","green") % user_info['data'][0]['username']     #printing username of friend
-                    print colored("FULL NAME OF USER: %s","green") % user_info['data']['fullname']       #printing fullnaame of friend
-                    print colored("BIODATA OF USER: %s","green") % user_info['data']['bio']          #printing biography of friend
-                    print colored("MORE WEBSITE : %s","green") % user_info['data']['website']        #printing more website linked to instagram
+                    print colored("USERNAME: %s","green") % user_info['data']['username']     #printing username of friend
+                    print colored("No. of followers: %s","green") % user_info['data']['counts']['followed_by']       #printing followers  of friend
+                    print colored("No of people you  are following : %s","green") % user_info['data']['counts']['follows']      #printing no of people follows by friend
+                    print colored("No. of posts are  : %s","green") % user_info['data']['counts']['media']        #printing no of psots of friend
                 else:
                     print colored("invalid user!","red")           #print when there is no data in friend's id
             else:
@@ -734,7 +733,7 @@ def StartBot():
         print "b.Get details of a user by username\n"
         print "c.Get your own recent post\n"
         print "d.Get user's recent post by username\n"
-        print "e.Get list of people who has liked your posts\n"
+        print "e.Get list of people who has liked your recent posts\n"
         print "f.Like the post of your friend\n"
         print "g.Unlike the post of your friend\n"
         print "h.Get the list of recent comment on your post\n"
@@ -755,10 +754,10 @@ def StartBot():
                 get_own_post()      #if choice is "c" then get_own_post() is called
             elif choice == "d":
                 insta_username = raw_input(colored("Enter the username of the user: ", "blue"))
-                get_user_post(insta_username)  # if choice is "b" then get_user_post() called and input insta name is passed as parameter
+                get_user_post(insta_username)  # if choice is "d" then get_user_post() called and input insta name is passed as parameter
             elif choice=="e":
                 insta_username = raw_input(colored("Enter the username of the user: ", "blue"))
-                get_like_list(insta_username)       # if choice is "c" then get_like_post() called and input insta name is passed as parameter
+                get_like_list(insta_username)       # if choice is "e" then get_like_post() called and input insta name is passed as parameter
             elif choice=="f":
                 insta_username = raw_input(colored("Enter the username whose post you want to like: ", "blue"))
                 like_a_post(insta_username)     # if choice is "f" then like_a_post() called and input insta name is passed as parameter
