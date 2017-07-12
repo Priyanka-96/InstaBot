@@ -1,6 +1,6 @@
 
 
-import matplotlib.pyplot as plt        #importing matplot lib for pie chart
+import matplotlib.pyplot as plt         #importing matplot lib for pie chart
 from textblob import TextBlob       #import Textblob for semantic analyse of a sentence
 from textblob.sentiments import NaiveBayesAnalyzer          #import Textblob for semantic analyse of a sentence
 import urllib                             #importing package which download the data from given url
@@ -253,9 +253,11 @@ def get_like_list(instaname):
             try:
                 if(user_likes['meta']['code']) == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
                     if len(user_likes['data']):  # checking if we have anything in data of friend's id
+                        list=[]
                         for i in range(len(user_likes['data'])):
-                            print colored("The person who recently liked pic is %s","green")  % (user_likes['data'][i]['full_name'])       #print the name who like your recent pic
-                            return user_likes['data'][i]['full_name']       #return the fullname of the person who has liked your friend's post
+                            print colored("Your post is liked by %s","green")  % (user_likes['data'][i]['full_name'])       #print the name who like your recent pic
+                            list.append(user_likes['data'][i]['full_name'])  #appending list
+                        return list     #returning to like_a_post() function
                     else:
                         print colored("No likes!","red")    #print when no likes
                 else:
@@ -276,8 +278,8 @@ def like_a_post(instaname):
     """
 
     username=get_self_name()        #calling get_self_name()
-    username1=get_like_list(instaname)          #calling get_like_list()
-    if username==username1:         #comparing both values
+    list=get_like_list(instaname)       #calling get_like_list()
+    if username in list:  #comparing if you have already liked the post or not
         print colored("OH! You have already liked this pic! :) ","green")           #print if already liked the pic
     else:
         user_id = get_user_id(instaname)        #calling get_user_id
@@ -733,7 +735,7 @@ def StartBot():
         print "b.Get details of a user by username\n"
         print "c.Get your own recent post\n"
         print "d.Get user's recent post by username\n"
-        print "e.Get list of people who has liked your recent posts\n"
+        print "e.Get list of people who has liked your recent post\n"
         print "f.Like the post of your friend\n"
         print "g.Unlike the post of your friend\n"
         print "h.Get the list of recent comment on your post\n"
