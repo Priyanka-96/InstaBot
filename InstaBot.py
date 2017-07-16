@@ -6,6 +6,9 @@ from textblob.sentiments import NaiveBayesAnalyzer          #import Textblob for
 import urllib                             #importing package which download the data from given url
 import requests                               #importing request package
 from termcolor import colored                    #import colored package
+from colorama import init       #importing coloroma package
+
+init()
 
 ACCESS_TOKEN="1572048031.23652d8.52bd5931f05b4c2f92fc6cc9a1e76378"         #my access token
 BASE_URL = 'https://api.instagram.com/v1/'          #instagram base url
@@ -628,7 +631,7 @@ def choose():
                                         print colored("Enter either Y or N!","red")     #print when wrong choice entered
 
                         else:
-                            print colored("You dont have any caption","red")        #no caption in any post
+                            print colored("No Such caption Available ","red")        #no caption in any post
                     else:
                         print colored("No data available!",'red')           # print when no data
                 else:
@@ -719,7 +722,70 @@ def display_pie_chart(instaname):
             else:
                 print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
 
+def Bar_graph():
+    """
+    this function prints the bargraph of popular hashtags on instagram
+    :return:--
+    """
+    try:
+        default_count = []      #list of hashtags you want to see in bargraph
+        choice = raw_input(colored('Make a choice ?\n 1. Enter your own hashtags?\n 2. Use predefined hashtags? \n 3. Back to menu? ',"magenta"))
+        hashtags=[]             #creating a list where hastags will be stored
+        count=[]            #storing the no of posts on instagram of particular hashtag
+        number=0        #no. of bars in your bargraph
+        if choice == '1':
+            number = int(raw_input('Enter the no. of popular hashtags do you want to enter:'))  #getting no. of hastags you want to enter n storing it in number
+            print 'Enter %d hash tags:' % number
+            for i in range(number):
+                default_count.append(i + 1)     #appending in default count list
+                hashtags.append(raw_input())        #getting the input if hashtags and storing in "hashtags" variable
+        elif choice=='2':
+            default_count= [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            hashtags = ['morning','beautiful','cute','smile','love','rain','insta','life','music','dance']      #default hashtags
+            number = 10         #number of hashtags by  default is 10
+        elif choice=='3':
+            StartBot()      #StartBot called
+        else:
+            print colored("Enter right choice :(","red")
+            StartBot()      #StartBot called if wrong choice entered
 
+        for i in range(number):
+            try:
+                request_url = BASE_URL + "tags/%s/?access_token=%s" % (hashtags[i], ACCESS_TOKEN)       #url of fetching the data of popular hashtags in hashtags[i] list
+                print 'GET request url : %s' % request_url          #printing get url
+                tag = requests.get(request_url).json()           #getting the data of the url above mentioned using requests package and using json()
+            except:
+                print colored("GET request is not working properly", "red")  # print when incorrect url
+            try:
+                if tag['meta']['code'] == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                    if len(tag['data']):                  # checking if we have any data or not
+                        count.append(tag['data']['media_count'])        #appending the no of times a particular tag is used in count url
+                    else:
+                        print colored("Tag not found : #%s","red") % hashtags[i]        #print when tag not found
+                        StartBot()          #calling startbot function
+                else:
+                    print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
+            except:
+                print KeyError      #print if any keyerror found
+
+        fig2 = plt.figure()         # calling figure() funtion of plt
+        fig2.patch.set_facecolor('pink')         # setting  facecolor to pink
+        fig2.patch.set_alpha(0.7)       # setting occupacy to 0.7
+        colors=['red', 'blue', 'black', 'yellow', 'green','grey','cyan','orange']       #colors for bars
+
+        # for plt.bar you can see the example and compare what is default_count and count
+            # y = [3, 10, 7, 5, 3, 4.5, 6, 8.1]
+            #N = len(y)
+            #x = range(N)
+            #width = 1/1.5
+            #plt.bar(x, y, width, color="blue")
+        plt.bar(default_count, count, tick_label=hashtags,color=colors, width=0.8)
+        plt.xlabel('--Name of hashtags--')      #settinf x axis label
+        plt.ylabel('--Number of occurence of hashtag--')        #setting y axis label
+        plt.title('BarGraph of frequency of occurence of popular Hashtags :)')      #setting title
+        plt.show()          #displays bargraph
+    except:
+        print colored("Function not working properly","red")        #print when any error in code
 
 #function contaning various menu option
 def StartBot():
@@ -744,7 +810,8 @@ def StartBot():
         print "k.Display pie chart comparing negative and positive comments on a post \n"
         print "l.To choose post by minimum likes or tag\n"
         print "m.To get the recent media liked by the user \n"
-        print "n.Exit the application"
+        print "n.Plot the Bar graph of Trending Hash Tags\n"
+        print "o.Exit the application"
         choice = raw_input(colored("Enter you choice: ","yellow"))        #getting menu choice from user
         if len(choice)>0 and len(choice)<2 and choice.isalpha()==True and choice.isspace()==False :   #check if correct choice entered
             if choice == "a":
@@ -783,6 +850,8 @@ def StartBot():
             elif choice=="m":
                 recent_media_liked()        #calling recent_media_liked() function
             elif choice=="n":
+                Bar_graph()     #calling  bargarph function
+            elif choice=='o':
                 exit()              #exit the program
             else:
                 print colored("You have entered a wrong choice","red")      #print when wrong choice entered
