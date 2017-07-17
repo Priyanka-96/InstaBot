@@ -6,9 +6,8 @@ from textblob.sentiments import NaiveBayesAnalyzer          #import Textblob for
 import urllib                             #importing package which download the data from given url
 import requests                               #importing request package
 from termcolor import colored                    #import colored package
-from colorama import init       #importing coloroma package
 
-init()
+
 
 ACCESS_TOKEN="1572048031.23652d8.52bd5931f05b4c2f92fc6cc9a1e76378"         #my access token
 BASE_URL = 'https://api.instagram.com/v1/'          #instagram base url
